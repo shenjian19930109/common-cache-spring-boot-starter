@@ -19,7 +19,12 @@ import static com.chinamobile.springboot.result.CacheResult.*;
  * @create: 2020/2/17 16:26
  */
 @Slf4j
-public class ClusterCacheService extends AbstractCache {
+public class ClusterCacheService extends AbstractExternalCache {
+
+
+
+
+
 
     private RedisAdvancedClusterCommands<String, String> redisClusterCommands;
 
