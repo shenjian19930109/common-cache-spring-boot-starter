@@ -1,5 +1,8 @@
 package com.chinamobile.springboot.autoconfiguration;
 
+import com.chinamobile.springboot.api.sync.Cache;
+import com.chinamobile.springboot.api.sync.ClusterCacheService;
+import com.chinamobile.springboot.api.sync.SingleCacheService;
 import com.chinamobile.springboot.properties.LettuceClusterProperties;
 import com.chinamobile.springboot.properties.LettuceProperties;
 import com.chinamobile.springboot.properties.LettuceSingleProperties;
@@ -83,6 +86,12 @@ public class LettuceAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnProperty(prefix = "lettuce.single.api", value = "type", havingValue = "sync")
+    public Cache singleCacheService(RedisCommands<String, String> singleRedisCommands) {
+        return new SingleCacheService(singleRedisCommands);
+    }
+
+    @Bean
     @ConditionalOnMissingBean(name = "singleRedisAsyncCommands")
     @ConditionalOnProperty(prefix = "lettuce.single.api", value = "type", havingValue = "async")
     public RedisAsyncCommands<String, String> singleRedisAsyncCommands(@Qualifier("singleRedisConnection") StatefulRedisConnection<String, String> singleRedisConnection) {
@@ -136,6 +145,12 @@ public class LettuceAutoConfiguration {
     @ConditionalOnProperty(prefix = "lettuce.cluster.api", value = "type", havingValue = "sync")
     public RedisAdvancedClusterCommands<String, String> redisClusterCommands(@Qualifier("redisClusterConnection") StatefulRedisClusterConnection<String, String> redisClusterConnection) {
         return redisClusterConnection.sync();
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "lettuce.cluster.api", value = "type", havingValue = "sync")
+    public Cache clusterCacheService(RedisAdvancedClusterCommands<String, String> redisClusterCommands) {
+        return new ClusterCacheService(redisClusterCommands);
     }
 
     @Bean
