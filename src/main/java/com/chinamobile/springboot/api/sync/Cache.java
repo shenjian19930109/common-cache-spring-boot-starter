@@ -14,6 +14,8 @@ import java.util.function.Function;
  */
 public interface Cache extends Cloneable {
 
+    //-----------------------------JSR 107 style API------------------------------------------------
+
     void set(String key, String value);
 
     String get(String key);
