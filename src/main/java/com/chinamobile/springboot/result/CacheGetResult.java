@@ -13,6 +13,9 @@ import lombok.Setter;
 @Setter
 public class CacheGetResult<T> extends CacheResult {
 
+    /**
+     * 数据
+     * */
     private T data;
 
     public static final CacheGetResult NOT_EXISTS_WITHOUT_MSG = new CacheGetResult(CacheResultCode.NOT_EXISTS, null, null);

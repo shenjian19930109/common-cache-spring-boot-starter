@@ -25,7 +25,13 @@ public class CacheResult {
     public static final CacheResult FAIL_ILLEGAL_ARGUMENT = new CacheResult(CacheResultCode.FAIL, MSG_ILLEGAL_ARGUMENT);
 //    public static final CacheResult EXISTS_WITHOUT_MSG = new CacheResult(CacheResultCode.EXISTS, null);
 
+    /**
+     * 返回码
+     * */
     private CacheResultCode resultCode;
+    /**
+     * msg
+     * */
     private String message;
 
     private Duration timeout = DEFAULT_TIMEOUT;
