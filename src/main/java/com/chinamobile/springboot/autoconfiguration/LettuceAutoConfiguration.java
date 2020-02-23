@@ -146,7 +146,7 @@ public class LettuceAutoConfiguration {
     @Bean(destroyMethod = "close")
     @ConditionalOnProperty(name = "commoncache.redis.lettuce.cluster.nodes")
     public StatefulRedisClusterConnection<String, String> redisClusterConnection(RedisClusterClient redisClusterClient) {
-        return redisClusterClient.connect();
+        return redisClusterClient.connect(new DefaultCacheCodec());
     }
 
     @Bean
