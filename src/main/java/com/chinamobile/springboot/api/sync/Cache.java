@@ -1,9 +1,9 @@
 package com.chinamobile.springboot.api.sync;
 
+import com.chinamobile.springboot.config.CacheConfig;
 import com.chinamobile.springboot.result.CacheGetResult;
 import com.chinamobile.springboot.result.CacheResult;
 
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -16,27 +16,45 @@ public interface Cache extends Cloneable {
 
     //-----------------------------JSR 107 style API------------------------------------------------
 
-    void set(String key, String value);
+    default void set(String key, String value) {
+        SET(key, value);
+    }
 
-    String get(String key);
+    default String get(String key) {
+        CacheGetResult<String> result = GET(key);
+        if (result.isSuccess()) {
+            return result.getData();
+        }else {
+            return null;
+        }
+    }
 
-    Long del(String key);
+    default boolean delete(String key) {
+        return DELETE(key).isSuccess();
+    }
 
-    void setex(String key, String value, int seconds);
-
-    void setpx(String key, String value, long timeout);
-
-    boolean setnx(String key, String value);
-
-    boolean setxx(String key, String value);
-
-    void delAll(Set<String> keys);
+//    void setex(String key, String value, int seconds);
+//
+//    void setpx(String key, String value, long timeout);
+//
+//    boolean setnx(String key, String value);
+//
+//    boolean setxx(String key, String value);
+//
+//    void delAll(Set<String> keys);
 
     CacheGetResult<String> GET(String key);
 
-    CacheResult SET(String key, String value);
+    default CacheResult SET(String key, String value) {
+        if (key == null) {
+            return CacheResult.FAIL_ILLEGAL_ARGUMENT;
+        }
+        return SET(key, value, config().getDefaultExpireMillis(), TimeUnit.MILLISECONDS);
+    }
 
     CacheResult SET(String key, String value, long expire, TimeUnit timeUnit);
+
+    CacheResult DELETE(String key);
 
     default String computeIfAbsent(String key, Function<String, String> loader) {
         return computeIfAbsent(key, loader, false);
@@ -46,5 +64,8 @@ public interface Cache extends Cloneable {
 
     String computeIfAbsent(String key, Function<String, String> loader, boolean cacheNullWhenLoaderReturnNull, long expire, TimeUnit timeUnit);
 
+    /********************************************************************/
+
+    CacheConfig config();
 
 }

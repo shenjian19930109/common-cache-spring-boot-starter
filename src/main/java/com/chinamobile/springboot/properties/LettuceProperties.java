@@ -9,7 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @create: 2020/2/13 17:17
  */
 @Data
-@ConfigurationProperties(prefix = "lettuce")
+@ConfigurationProperties(prefix = "commoncache.redis.lettuce")
 public class LettuceProperties {
 
     private LettuceSingleProperties single;

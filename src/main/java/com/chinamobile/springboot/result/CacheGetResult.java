@@ -22,4 +22,8 @@ public class CacheGetResult<T> extends CacheResult {
         super(resultCode, message);
         this.data = data;
     }
+
+    public CacheGetResult(Throwable e) {
+        super(e);
+    }
 }

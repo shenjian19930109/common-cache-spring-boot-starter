@@ -71,11 +71,6 @@ public abstract class AbstractCache implements Cache {
     protected abstract CacheGetResult<String> do_GET(String key);
 
     @Override
-    public CacheResult SET(String key, String value) {
-        return SET(key, value, 0, null);
-    }
-
-    @Override
     public CacheResult SET(String key, String value, long expire, TimeUnit timeUnit) {
 
         long t = System.currentTimeMillis();
@@ -83,10 +78,26 @@ public abstract class AbstractCache implements Cache {
         if (key == null) {
             result = CacheResult.FAIL_ILLEGAL_ARGUMENT;
         }else {
-            result = do_PUT(key, value, expire, timeUnit);
+            result = do_SET(key, value, expire, timeUnit);
         }
         return result;
     }
 
-    protected abstract CacheResult do_PUT(String key, String value, long expire, TimeUnit timeUnit);
+    protected abstract CacheResult do_SET(String key, String value, long expire, TimeUnit timeUnit);
+
+    @Override
+    public CacheResult DELETE(String key) {
+
+        long t = System.currentTimeMillis();
+        CacheResult result;
+        if (key == null) {
+            result = CacheResult.FAIL_ILLEGAL_ARGUMENT;
+        }else {
+            result = do_DELETE(key);
+        }
+        return result;
+    }
+
+    protected abstract CacheResult do_DELETE(String key);
+
 }
