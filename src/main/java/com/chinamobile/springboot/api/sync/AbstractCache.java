@@ -3,7 +3,6 @@ package com.chinamobile.springboot.api.sync;
 import com.chinamobile.springboot.common.enums.CacheResultCode;
 import com.chinamobile.springboot.result.CacheGetResult;
 import com.chinamobile.springboot.result.CacheResult;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -21,21 +20,23 @@ public abstract class AbstractCache implements Cache {
     }
 
     @Override
-    public final String computeIfAbsent(String key, Function<String, String> loader, boolean cacheNullWhenLoaderReturnNull, long expire, TimeUnit timeUnit) {
+    public final String computeIfAbsent(String key, Function<String, String> loader, boolean cacheNullWhenLoaderReturnNull,
+                                        long expire, TimeUnit timeUnit) {
         return computeIfAbsentImpl(key, loader, cacheNullWhenLoaderReturnNull, expire, timeUnit, this);
     }
 
-    static String computeIfAbsentImpl(String key, Function<String, String> loader, boolean cacheNullWhenLoaderReturnNull, long expire, TimeUnit timeUnit, Cache cache) {
+    static String computeIfAbsentImpl(String key, Function<String, String> loader, boolean cacheNullWhenLoaderReturnNull,
+                                      long expire, TimeUnit timeUnit, Cache cache) {
 
         CacheGetResult<String> result = cache.GET(key);
 
-        if (result.isSuccess() || result.getResultCode() == CacheResultCode.EXISTS_WITH_EMPTY_VALUE) {
+        if (result.isSuccess() /*|| result.getResultCode() == CacheResultCode.EXISTS_WITH_EMPTY_VALUE*/) {
             return result.getData();
         }else if (result.getResultCode() == CacheResultCode.NOT_EXISTS) {
             String dbValue = loader.apply(key);
             if (needUpdate(dbValue, cacheNullWhenLoaderReturnNull)) {
                 if (expire <= 0 || timeUnit == null) {
-                    cache.set(key, dbValue);
+                    cache.SET(key, dbValue);
                 }else {
                     cache.SET(key, dbValue, expire, timeUnit);
                 }
@@ -47,12 +48,13 @@ public abstract class AbstractCache implements Cache {
     }
 
     private static boolean needUpdate(String dbValue, boolean cacheNullWhenLoaderReturnNull) {
-        if (StringUtils.isEmpty(dbValue) && cacheNullWhenLoaderReturnNull) {
+        /*if (dbValue == null && cacheNullWhenLoaderReturnNull) {
             return true;
-        }else if (StringUtils.isNotEmpty(dbValue)) {
+        }else if (dbValue != null) {
             return true;
         }
-        return false;
+        return false;*/
+        return dbValue != null || cacheNullWhenLoaderReturnNull;
     }
 
     @Override
