@@ -44,7 +44,7 @@ public abstract class RedisLettuceCache extends AbstractExternalCache {
         valueEncoder = config.getValueEncoder();
         valueDecoder = config.getValueDecoder();
         redisClient = config.getRedisClient();
-//        connection = config.getConnection();
+//        connection = config.getConnection();===
 
         connectionManager = LettuceConnectionManager.defaultManager();
         connectionManager.init(redisClient, config.getConnection());
