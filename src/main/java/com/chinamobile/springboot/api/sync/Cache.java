@@ -20,6 +20,30 @@ public interface Cache extends Cloneable {
         SET(key, value);
     }
 
+    default void set(String key, String value, long expire, TimeUnit timeUnit) {
+        SET(key, value, expire, timeUnit);
+    }
+
+    default boolean setIfNotExist(String key, String value) {
+        CacheResult result = SET_IF_NOT_EXIST(key, value, config().getDefaultExpireMillis(), TimeUnit.MILLISECONDS);
+        return result.isSuccess();
+    }
+
+    default boolean setIfNotExist(String key, String value, long expire, TimeUnit timeUnit) {
+        CacheResult result = SET_IF_NOT_EXIST(key, value, expire, timeUnit);
+        return result.isSuccess();
+    }
+
+    default boolean setIfExist(String key, String value) {
+        CacheResult result = SET_IF_EXIST(key, value, config().getDefaultExpireMillis(), TimeUnit.MILLISECONDS);
+        return result.isSuccess();
+    }
+
+    default boolean setIfExist(String key, String value, long expire, TimeUnit timeUnit) {
+        CacheResult result = SET_IF_EXIST(key, value, expire, timeUnit);
+        return result.isSuccess();
+    }
+
     default String get(String key) {
         CacheGetResult<String> result = GET(key);
         if (result.isSuccess()) {
@@ -53,6 +77,10 @@ public interface Cache extends Cloneable {
     }
 
     CacheResult SET(String key, String value, long expire, TimeUnit timeUnit);
+
+    CacheResult SET_IF_NOT_EXIST(String key, String value, long expire, TimeUnit timeUnit);
+
+    CacheResult SET_IF_EXIST(String key, String value, long expire, TimeUnit timeUnit);
 
     CacheResult DELETE(String key);
 

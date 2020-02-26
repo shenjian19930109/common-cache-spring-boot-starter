@@ -88,6 +88,36 @@ public abstract class AbstractCache implements Cache {
     protected abstract CacheResult do_SET(String key, String value, long expire, TimeUnit timeUnit);
 
     @Override
+    public CacheResult SET_IF_NOT_EXIST(String key, String value, long expire, TimeUnit timeUnit) {
+
+        long t = System.currentTimeMillis();
+        CacheResult result;
+        if (key == null) {
+            result = CacheResult.FAIL_ILLEGAL_ARGUMENT;
+        }else {
+            result = do_SET_IF_NOT_EXIST(key, value, expire, timeUnit);
+        }
+        return result;
+    }
+
+    protected abstract CacheResult do_SET_IF_NOT_EXIST(String key, String value, long expire, TimeUnit timeUnit);
+
+    @Override
+    public CacheResult SET_IF_EXIST(String key, String value, long expire, TimeUnit timeUnit) {
+
+        long t = System.currentTimeMillis();
+        CacheResult result;
+        if (key == null) {
+            result = CacheResult.FAIL_ILLEGAL_ARGUMENT;
+        }else {
+            result = do_SET_IF_EXIST(key, value, expire, timeUnit);
+        }
+        return result;
+    }
+
+    protected abstract CacheResult do_SET_IF_EXIST(String key, String value, long expire, TimeUnit timeUnit);
+
+    @Override
     public CacheResult DELETE(String key) {
 
         long t = System.currentTimeMillis();

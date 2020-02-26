@@ -4,12 +4,15 @@ import com.chinamobile.springboot.common.enums.CacheResultCode;
 import com.chinamobile.springboot.lettuce.RedisLettuceCacheConfig;
 import com.chinamobile.springboot.result.CacheGetResult;
 import com.chinamobile.springboot.result.CacheResult;
+import io.lettuce.core.SetArgs;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.TimeUnit;
 
 import static com.chinamobile.springboot.result.CacheGetResult.NOT_EXISTS_WITHOUT_MSG;
+import static com.chinamobile.springboot.result.CacheResult.ALREADY_EXISTS_WITHOUT_SET;
 import static com.chinamobile.springboot.result.CacheResult.FAIL_WITHOUT_MSG;
+import static com.chinamobile.springboot.result.CacheResult.NOT_EXISTS_WITHOUT_SET;
 import static com.chinamobile.springboot.result.CacheResult.SUCCESS_WITHOUT_MSG;
 
 /**
@@ -45,9 +48,9 @@ public class SyncRedisLettuceCache extends RedisLettuceCache {
     @Override
     protected CacheResult do_SET(String key, String value, long expire, TimeUnit timeUnit) {
 
+        CacheResult cacheResult;
+        String result;
         try {
-            CacheResult cacheResult;
-            String result;
             byte[] newKey = buildKey(key);
             if (expire <= 0 || timeUnit == null) {
                 result = commands.set(newKey, valueEncoder.apply(value));
@@ -67,10 +70,62 @@ public class SyncRedisLettuceCache extends RedisLettuceCache {
     }
 
     @Override
+    protected CacheResult do_SET_IF_NOT_EXIST(String key, String value, long expire, TimeUnit timeUnit) {
+
+        CacheResult cacheResult;
+        String result;
+        try {
+            byte[] newKey = buildKey(key);
+            if (expire <= 0 || timeUnit == null) {
+                result = commands.set(newKey, valueEncoder.apply(value), SetArgs.Builder.nx());
+            }else {
+                result = commands.set(newKey, valueEncoder.apply(value), SetArgs.Builder.nx().px(timeUnit.toMillis(expire)));
+            }
+            if (result == null) {
+                cacheResult = ALREADY_EXISTS_WITHOUT_SET;
+            }else if (result.equalsIgnoreCase("OK")) {
+                cacheResult = SUCCESS_WITHOUT_MSG;
+            }else {
+                cacheResult = new CacheResult(CacheResultCode.FAIL, result);
+            }
+            return cacheResult;
+        }catch (Exception e) {
+            log.error("do_SET_IF_NOT_EXIST : (" + key + ", " + value + "), exception : ", e);
+            return new CacheResult(e);
+        }
+    }
+
+    @Override
+    protected CacheResult do_SET_IF_EXIST(String key, String value, long expire, TimeUnit timeUnit) {
+
+        CacheResult cacheResult;
+        String result;
+        try {
+            byte[] newKey = buildKey(key);
+            if (expire <= 0 || timeUnit == null) {
+                result = commands.set(newKey, valueEncoder.apply(value), SetArgs.Builder.xx());
+            }else {
+                result = commands.set(newKey, valueEncoder.apply(value), SetArgs.Builder.xx().px(timeUnit.toMillis(expire)));
+            }
+            if (result == null) {
+                cacheResult = NOT_EXISTS_WITHOUT_SET;
+            }else if (result.equalsIgnoreCase("OK")) {
+                cacheResult = SUCCESS_WITHOUT_MSG;
+            }else {
+                cacheResult = new CacheResult(CacheResultCode.FAIL, result);
+            }
+            return cacheResult;
+        }catch (Exception e) {
+            log.error("do_SET_IF_EXIST : (" + key + ", " + value + "), exception : ", e);
+            return new CacheResult(e);
+        }
+    }
+
+    @Override
     protected CacheResult do_DELETE(String key) {
 
+        CacheResult cacheResult;
         try {
-            CacheResult cacheResult;
             byte[] newKey = buildKey(key);
             Long result = keyCommands.del(newKey);
             if (result == 1) {

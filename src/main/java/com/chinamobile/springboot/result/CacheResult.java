@@ -23,7 +23,8 @@ public class CacheResult {
 //    public static final CacheResult PART_SUCCESS_WITHOUT_MSG = new CacheResult(CacheResultCode.PART_SUCCESS, null);
     public static final CacheResult FAIL_WITHOUT_MSG = new CacheResult(CacheResultCode.FAIL, null);
     public static final CacheResult FAIL_ILLEGAL_ARGUMENT = new CacheResult(CacheResultCode.FAIL, MSG_ILLEGAL_ARGUMENT);
-//    public static final CacheResult EXISTS_WITHOUT_MSG = new CacheResult(CacheResultCode.EXISTS, null);
+    public static final CacheResult ALREADY_EXISTS_WITHOUT_SET = new CacheResult(CacheResultCode.ALREADY_EXISTS, null);
+    public static final CacheResult NOT_EXISTS_WITHOUT_SET = new CacheResult(CacheResultCode.NOT_EXISTS, null);
 
     private CacheResultCode resultCode;
     private String message;
