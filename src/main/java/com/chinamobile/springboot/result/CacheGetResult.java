@@ -4,6 +4,8 @@ import com.chinamobile.springboot.common.enums.CacheResultCode;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.concurrent.CompletionStage;
+
 /**
  * @description:
  * @author: shenjian
@@ -23,7 +25,28 @@ public class CacheGetResult<T> extends CacheResult {
         this.data = data;
     }
 
+    public CacheGetResult(CompletionStage<ResultData> future) {
+        super(future);
+    }
+
     public CacheGetResult(Throwable e) {
         super(e);
+    }
+
+    public T getData() {
+        waitForResult();
+        return data;
+    }
+
+    @Override
+    protected void settingSuccessResult(ResultData resultData) {
+        super.settingSuccessResult(resultData);
+        this.data = (T) resultData.getData();
+    }
+
+    @Override
+    protected void settingFailResult(Exception e) {
+        super.settingFailResult(e);
+        this.data = null;
     }
 }

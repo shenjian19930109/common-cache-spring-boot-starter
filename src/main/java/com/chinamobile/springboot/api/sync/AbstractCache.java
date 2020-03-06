@@ -14,6 +14,12 @@ import java.util.function.Function;
  */
 public abstract class AbstractCache implements Cache {
 
+//    private CacheConfig config;
+//
+//    public AbstractCache(CacheConfig config) {
+//        this.config = config;
+//    }
+
     @Override
     public final String computeIfAbsent(String key, Function<String, String> loader, boolean cacheNullWhenLoaderReturnNull) {
         return computeIfAbsent(key, loader, cacheNullWhenLoaderReturnNull, 0, null);
@@ -70,7 +76,7 @@ public abstract class AbstractCache implements Cache {
         return result;
     }
 
-    protected abstract CacheGetResult<String> do_GET(String key);
+    protected abstract CacheGetResult do_GET(String key);
 
     @Override
     public CacheResult SET(String key, String value, long expire, TimeUnit timeUnit) {
@@ -80,7 +86,15 @@ public abstract class AbstractCache implements Cache {
         if (key == null) {
             result = CacheResult.FAIL_ILLEGAL_ARGUMENT;
         }else {
-            result = do_SET(key, value, expire, timeUnit);
+            if (expire <= 0 && config().whenInValidExpireOrTimeUnitReturnFail()) {
+                result = CacheResult.FAIL_ILLEGAL_EXPIRE;
+            }else if (timeUnit == null && config().whenInValidExpireOrTimeUnitReturnFail()) {
+                result = CacheResult.FAIL_ILLEGAL_TIMEUNIT;
+            }else if (applyDefaultExpireAndTimeUnit(expire, timeUnit, config().whenInValidExpireOrTimeUnitReturnFail())) {
+                result = do_SET(key, value, config().getDefaultExpireMillis(), TimeUnit.MILLISECONDS);
+            }else {
+                result = do_SET(key, value, expire, timeUnit);
+            }
         }
         return result;
     }
@@ -95,7 +109,15 @@ public abstract class AbstractCache implements Cache {
         if (key == null) {
             result = CacheResult.FAIL_ILLEGAL_ARGUMENT;
         }else {
-            result = do_SET_IF_NOT_EXIST(key, value, expire, timeUnit);
+            if (expire <= 0 && config().whenInValidExpireOrTimeUnitReturnFail()) {
+                result = CacheResult.FAIL_ILLEGAL_EXPIRE;
+            }else if (timeUnit == null && config().whenInValidExpireOrTimeUnitReturnFail()) {
+                result = CacheResult.FAIL_ILLEGAL_TIMEUNIT;
+            }else if (applyDefaultExpireAndTimeUnit(expire, timeUnit, config().whenInValidExpireOrTimeUnitReturnFail())) {
+                result = do_SET_IF_NOT_EXIST(key, value, config().getDefaultExpireMillis(), TimeUnit.MILLISECONDS);
+            }else {
+                result = do_SET_IF_NOT_EXIST(key, value, expire, timeUnit);
+            }
         }
         return result;
     }
@@ -110,9 +132,26 @@ public abstract class AbstractCache implements Cache {
         if (key == null) {
             result = CacheResult.FAIL_ILLEGAL_ARGUMENT;
         }else {
-            result = do_SET_IF_EXIST(key, value, expire, timeUnit);
+            if (expire <= 0 && config().whenInValidExpireOrTimeUnitReturnFail()) {
+                result = CacheResult.FAIL_ILLEGAL_EXPIRE;
+            }else if (timeUnit == null && config().whenInValidExpireOrTimeUnitReturnFail()) {
+                result = CacheResult.FAIL_ILLEGAL_TIMEUNIT;
+            }else if (applyDefaultExpireAndTimeUnit(expire, timeUnit, config().whenInValidExpireOrTimeUnitReturnFail())) {
+                result = do_SET_IF_EXIST(key, value, config().getDefaultExpireMillis(), TimeUnit.MILLISECONDS);
+            }else {
+                result = do_SET_IF_EXIST(key, value, expire, timeUnit);
+            }
         }
         return result;
+    }
+
+    private boolean applyDefaultExpireAndTimeUnit(long expire, TimeUnit timeUnit, boolean inValidExpireOrTimeUnitReturnFail) {
+        if (expire > 0 && timeUnit != null) {
+            return false;
+        }else if (!inValidExpireOrTimeUnitReturnFail) {
+            return true;
+        }
+        return false;
     }
 
     protected abstract CacheResult do_SET_IF_EXIST(String key, String value, long expire, TimeUnit timeUnit);

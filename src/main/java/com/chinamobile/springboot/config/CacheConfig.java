@@ -16,11 +16,17 @@ import java.util.function.Function;
 @NoArgsConstructor
 public class CacheConfig implements Cloneable {
 
-    private long defaultExpireMillis = Integer.MAX_VALUE * 1000;
+    private long defaultExpireMillis = Integer.MAX_VALUE;
+
+    private boolean inValidExpireOrTimeUnitReturnFail = true;
 
     private Function<Object, Object> keyConvertor;
 
     public CacheConfig(Function<Object, Object> keyConvertor) {
         this.keyConvertor = keyConvertor;
+    }
+
+    public boolean whenInValidExpireOrTimeUnitReturnFail() {
+        return inValidExpireOrTimeUnitReturnFail;
     }
 }

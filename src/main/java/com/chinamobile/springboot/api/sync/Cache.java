@@ -25,7 +25,7 @@ public interface Cache extends Cloneable {
     }
 
     default boolean setIfNotExist(String key, String value) {
-        CacheResult result = SET_IF_NOT_EXIST(key, value, config().getDefaultExpireMillis(), TimeUnit.MILLISECONDS);
+        CacheResult result = SET_IF_NOT_EXIST(key, value);
         return result.isSuccess();
     }
 
@@ -78,7 +78,21 @@ public interface Cache extends Cloneable {
 
     CacheResult SET(String key, String value, long expire, TimeUnit timeUnit);
 
+    default CacheResult SET_IF_NOT_EXIST(String key, String value) {
+        if (key == null) {
+            return CacheResult.FAIL_ILLEGAL_ARGUMENT;
+        }
+        return SET_IF_NOT_EXIST(key, value, config().getDefaultExpireMillis(), TimeUnit.MILLISECONDS);
+    }
+
     CacheResult SET_IF_NOT_EXIST(String key, String value, long expire, TimeUnit timeUnit);
+
+    default CacheResult SET_IF_EXIST(String key, String value) {
+        if (key == null) {
+            return CacheResult.FAIL_ILLEGAL_ARGUMENT;
+        }
+        return SET_IF_EXIST(key, value, config().getDefaultExpireMillis(), TimeUnit.MILLISECONDS);
+    }
 
     CacheResult SET_IF_EXIST(String key, String value, long expire, TimeUnit timeUnit);
 

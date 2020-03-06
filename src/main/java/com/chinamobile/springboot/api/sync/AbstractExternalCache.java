@@ -17,6 +17,7 @@ public abstract class AbstractExternalCache extends AbstractCache {
     private ExternalCacheConfig config;
 
     public AbstractExternalCache(ExternalCacheConfig config) {
+//        super(config);
         this.config = config;
         checkConfig();
     }
